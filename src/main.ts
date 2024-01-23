@@ -34,22 +34,26 @@ function flattenTree(tree: MctsNode): MctsNode[] {
 
 function renderPlot(tree: MctsNode): (SVGElement | HTMLElement) & Plot.Plot {
   return Plot.plot({
-    axis: null,
-    height: 1000,
+    height: 1200,
+    width: 500,
     margin: 10,
-    marginLeft: 40,
-    marginRight: 120,
+    axis: null,
     marks: [
       Plot.tree(flattenTree(tree), {
         path: "name",
         delimiter: ".",
-        textStroke: "black",
+        fill: "gray",
+        stroke: () => Math.random(),
+        text: "null",
       }),
     ],
+    style: {
+      transform: "rotate(90deg)",
+    },
   });
 }
 
 const div = document.querySelector<HTMLDivElement>("#app")!;
-const tree = generateTree(6);
+const tree = generateTree(7);
 const plot = renderPlot(tree);
 div.append(plot);
