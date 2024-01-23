@@ -9,7 +9,11 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "typescript": "^5.2.2",
+    "prettier": "^3.2.4",
+    "typescript": "*",
     "vite": "^5.0.12"
+  },
+  "dependencies": {
+    "@observablehq/plot": "^0.6.13"
   }
 }
