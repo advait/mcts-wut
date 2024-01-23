@@ -1,0 +1,9 @@
+{
+  "name": "mcts-wut",
+  "version": "1.0.0",
+  "description": "How does monte carlo tree serach work?",
+  "main": "index.js",
+  "repository": "https://github.com/advait/mcts-wut",
+  "author": "Advait Shinde <advait.shinde@gmail.com>",
+  "license": "MIT"
+}
