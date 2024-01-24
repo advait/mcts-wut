@@ -1,3 +1,4 @@
+import * as d3 from "d3";
 import * as Plot from "@observablehq/plot";
 import React from "react";
 import { useEffect, useRef } from "react";
@@ -123,13 +124,19 @@ function flattenTree(tree: MNode): MNode[] {
   return nodes;
 }
 
-export function TreePlot({ tree }: { tree: MNode }) {
+type TreePlotProps = {
+  tree: MNode;
+  showVisitCount: boolean;
+};
+
+export function TreePlot({ tree, showVisitCount }: TreePlotProps) {
   const plotRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // d3 trees render horizontally, so we perform a manual rotation after rendering
     const endHeight = 400;
     const endWidth = 1400;
+    const maxVisitCount = tree.visitCount;
 
     const svg = Plot.plot({
       height: endWidth,
@@ -143,9 +150,20 @@ export function TreePlot({ tree }: { tree: MNode }) {
         Plot.tree(flattenTree(tree), {
           path: "name",
           delimiter: ".",
-          r: 4,
+          r: (d: MNode) => (d.lastTraversed ? 4 : 1),
           symbol: (d: MNode) => (d.isTerminal() ? "star" : "circle"),
           fill: (d: MNode) => d.avgValue(),
+          stroke: (d: MNode) => {
+            if (showVisitCount) {
+              return d3.interpolateTurbo(
+                (d.visitCount / (maxVisitCount + 1)) ** 0.2,
+              );
+            }
+            if (d.isTerminal() && d.visitCount == 0) {
+              return 0;
+            }
+            return d.avgValue();
+          },
           strokeWidth: (d: MNode) => (d.lastTraversed ? 4 : 1),
           text: "null",
         }),
@@ -168,7 +186,7 @@ export function TreePlot({ tree }: { tree: MNode }) {
     return () => {
       plotRef.current!.removeChild(svg);
     };
-  }, [tree]);
+  }, [tree, showVisitCount]);
 
   return <div ref={plotRef} />;
 }
