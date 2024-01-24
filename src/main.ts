@@ -3,6 +3,10 @@ import * as seedrandom from "seedrandom";
 
 const rng = seedrandom("advait3000");
 
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 class MNode {
   name: string;
   accumulatedValue: number;
@@ -144,15 +148,31 @@ function renderPlot(tree: MNode): (SVGElement | HTMLElement) & Plot.Plot {
   return svg;
 }
 
+const div = document.querySelector<HTMLDivElement>("#app")!;
+
+let tree: MNode;
+doResetTree();
+
+function doResetTree() {
+  tree = generateTree(7);
+  setTerminalValues(tree, (hRatio) => Math.sin(4 * hRatio * Math.PI));
+}
+
 function doTraverseOnce() {
   resetLastTraversed(tree);
   performRandomTraversal(tree);
-  const plot = renderPlot(tree);
-  div.replaceChild(plot, div.lastChild!);
+  doRender();
 }
 
-const div = document.querySelector<HTMLDivElement>("#app")!;
+function doRender() {
+  const plot = renderPlot(tree);
+  div.replaceChildren(plot);
+}
 
+document.querySelector("#reset")!.addEventListener("click", () => {
+  doResetTree();
+  doRender();
+});
 document.querySelector("#t1")!.addEventListener("click", doTraverseOnce);
 document.querySelector("#t100")!.addEventListener("click", async () => {
   for (let i = 0; i < 100; i++) {
@@ -160,13 +180,4 @@ document.querySelector("#t100")!.addEventListener("click", async () => {
     await sleep(25);
   }
 });
-
-const tree = generateTree(7);
-setTerminalValues(tree, (hRatio) => Math.sin(4 * hRatio * Math.PI));
-const plot = renderPlot(tree);
-
-div.append(plot);
-
-async function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+doRender();
