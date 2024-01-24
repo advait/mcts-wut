@@ -13,12 +13,18 @@ import {
   FormControl,
   FormLabel,
   HStack,
+  Heading,
   NumberDecrementStepper,
   NumberIncrementStepper,
   NumberInput,
   NumberInputField,
   NumberInputStepper,
   SimpleGrid,
+  Stat,
+  StatGroup,
+  StatHelpText,
+  StatLabel,
+  StatNumber,
   Switch,
   VStack,
 } from "@chakra-ui/react";
@@ -44,7 +50,8 @@ export function App() {
   };
 
   return (
-    <VStack mt={8}>
+    <VStack mt={8} spacing={8} alignItems="flex-start">
+      <Heading>Monte Carlo Tree Search (MCTS)</Heading>
       <TreePlot tree={tree} showVisitCount={showVisitCount} />;
       <HStack alignItems="flex-start" spacing={4} mt={4} width="100%">
         <Card p={4}>
@@ -80,6 +87,33 @@ export function App() {
               Reset
             </Button>
           </HStack>
+        </Card>
+        <Card p={4} width="300px">
+          <StatGroup>
+            <Stat>
+              <StatLabel>Root Value</StatLabel>
+              <StatNumber>{tree.avgValue().toFixed(2)}</StatNumber>
+            </Stat>
+            <Stat>
+              <StatLabel>Policy</StatLabel>
+              <HStack spacing={4}>
+                {tree.children.map((child, i) => {
+                  if (tree.visitCount == 0) {
+                    return (
+                      <StatNumber key={i}>
+                        {(1 / tree.children.length).toFixed(2)}
+                      </StatNumber>
+                    );
+                  }
+                  return (
+                    <StatNumber key={i}>
+                      {(child.visitCount / tree.visitCount).toFixed(2)}
+                    </StatNumber>
+                  );
+                })}
+              </HStack>
+            </Stat>
+          </StatGroup>
         </Card>
       </HStack>
     </VStack>
