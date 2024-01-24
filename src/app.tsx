@@ -70,6 +70,8 @@ export function App() {
                 setDepth(parseInt(v));
                 setTree(initTree(parseInt(v)));
               }}
+              min={2}
+              max={10}
             >
               <NumberInputField />
               <NumberInputStepper>
@@ -101,13 +103,13 @@ export function App() {
                   if (tree.visitCount == 0) {
                     return (
                       <StatNumber key={i}>
-                        {(1 / tree.children.length).toFixed(2)}
+                        {((1 / tree.children.length) * 100).toFixed(0)}%
                       </StatNumber>
                     );
                   }
                   return (
                     <StatNumber key={i}>
-                      {(child.visitCount / tree.visitCount).toFixed(2)}
+                      {((child.visitCount / tree.visitCount) * 100).toFixed(0)}%
                     </StatNumber>
                   );
                 })}
