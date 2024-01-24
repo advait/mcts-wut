@@ -8,6 +8,7 @@ class MNode {
   accumulatedValue: number;
   children: MNode[] = [];
   visitCount: number = 0;
+  lastTraversed: boolean = false;
 
   constructor(name: string, initValue: number = 0) {
     this.name = name;
@@ -25,27 +26,44 @@ class MNode {
 
     return this.accumulatedValue / this.visitCount;
   }
+
+  hIndex(): number {
+    const binIndex = this.name.replace(/\./g, "");
+    return parseInt(binIndex, 2);
+  }
 }
 
 function generateTree(
   maxDepth: number,
-  terminalValueFn: (depth: number) => number,
   curDepth: number = 0,
   nodeName: string = "",
   fanout: number = 2,
 ): MNode {
   if (curDepth >= maxDepth) {
-    return new MNode(nodeName, terminalValueFn(curDepth));
+    return new MNode(nodeName);
   }
 
   const ret: MNode = new MNode(nodeName);
   for (let i = 0; i < fanout; i++) {
     let childName = nodeName ? `${nodeName}.${i}` : `${i}`;
-    ret.children.push(
-      generateTree(maxDepth, terminalValueFn, curDepth + 1, childName, fanout),
-    );
+    ret.children.push(generateTree(maxDepth, curDepth + 1, childName, fanout));
   }
   return ret;
+}
+
+function getTerminalNodes(tree: MNode): MNode[] {
+  if (tree.isTerminal()) {
+    return [tree];
+  }
+  return tree.children.flatMap((c) => getTerminalNodes(c));
+}
+
+function setTerminalValues(tree: MNode, genValue: (hRatio: number) => number) {
+  const terminalNodes = getTerminalNodes(tree);
+  terminalNodes.forEach((t) => {
+    const hRatio = t.hIndex() / terminalNodes.length;
+    t.accumulatedValue = genValue(hRatio);
+  });
 }
 
 function flattenTree(tree: MNode): MNode[] {
@@ -72,7 +90,13 @@ function performRandomTraversal(tree: MNode) {
   visited.forEach((node) => {
     node.visitCount++;
     node.accumulatedValue += finalValue;
+    node.lastTraversed = true;
   });
+}
+
+function resetLastTraversed(tree: MNode) {
+  tree.lastTraversed = false;
+  tree.children.forEach((c) => resetLastTraversed(c));
 }
 
 function renderPlot(tree: MNode): (SVGElement | HTMLElement) & Plot.Plot {
@@ -95,9 +119,7 @@ function renderPlot(tree: MNode): (SVGElement | HTMLElement) & Plot.Plot {
         r: 4,
         symbol: (d: MNode) => (d.isTerminal() ? "square" : "circle"),
         fill: (d: MNode) => d.avgValue(),
-        stroke: "gray",
-        strokeWidth: 3,
-        strokeLinecap: "square",
+        strokeWidth: (d: MNode) => (d.lastTraversed ? 4 : 1),
         text: "null",
       }),
     ],
@@ -122,13 +144,15 @@ const div = document.querySelector<HTMLDivElement>("#app")!;
 const but = document.createElement("button");
 but.textContent = "Traverse";
 but.onclick = () => {
+  resetLastTraversed(tree);
   performRandomTraversal(tree);
   const plot = renderPlot(tree);
   div.replaceChild(plot, div.lastChild!);
 };
 div.appendChild(but);
 
-const tree = generateTree(7, () => rng() * 2 - 1);
+const tree = generateTree(3);
+setTerminalValues(tree, (hRatio) => Math.sin(4 * hRatio * Math.PI));
 const plot = renderPlot(tree);
 
 div.append(plot);
