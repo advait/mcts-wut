@@ -20,13 +20,16 @@ class MNode {
   }
 
   avgValue(): number {
-    if (this.visitCount == 0) {
+    if (this.visitCount == 0 || this.isTerminal()) {
       return this.accumulatedValue;
     }
 
     return this.accumulatedValue / this.visitCount;
   }
 
+  /**
+   * Returns the horizontal index of the node across all cousin nodes at this depth.
+   */
   hIndex(): number {
     const binIndex = this.name.replace(/\./g, "");
     return parseInt(binIndex, 2);
@@ -88,9 +91,11 @@ function performRandomTraversal(tree: MNode) {
 
   const finalValue = cur.accumulatedValue;
   visited.forEach((node) => {
-    node.visitCount++;
-    node.accumulatedValue += finalValue;
     node.lastTraversed = true;
+    node.visitCount++;
+    if (!node.isTerminal()) {
+      node.accumulatedValue += finalValue;
+    }
   });
 }
 
@@ -139,20 +144,29 @@ function renderPlot(tree: MNode): (SVGElement | HTMLElement) & Plot.Plot {
   return svg;
 }
 
-const div = document.querySelector<HTMLDivElement>("#app")!;
-
-const but = document.createElement("button");
-but.textContent = "Traverse";
-but.onclick = () => {
+function doTraverseOnce() {
   resetLastTraversed(tree);
   performRandomTraversal(tree);
   const plot = renderPlot(tree);
   div.replaceChild(plot, div.lastChild!);
-};
-div.appendChild(but);
+}
 
-const tree = generateTree(3);
+const div = document.querySelector<HTMLDivElement>("#app")!;
+
+document.querySelector("#t1")!.addEventListener("click", doTraverseOnce);
+document.querySelector("#t100")!.addEventListener("click", async () => {
+  for (let i = 0; i < 100; i++) {
+    doTraverseOnce();
+    await sleep(25);
+  }
+});
+
+const tree = generateTree(7);
 setTerminalValues(tree, (hRatio) => Math.sin(4 * hRatio * Math.PI));
 const plot = renderPlot(tree);
 
 div.append(plot);
+
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
