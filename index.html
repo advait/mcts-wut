@@ -4,36 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MCTS: how does it work?</title>
-    <style>
-      :root {
-        font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-
-        color-scheme: light dark;
-        color: rgba(255, 255, 255, 0.87);
-        background-color: #242424;
-      }
-
-      #controls {
-        margin: 80px auto;
-      }
-
-      #controls button {
-        margin-right: 16px;
-      }
-
-      .container {
-        width: 1400px;
-        margin: 12px auto;
-      }
-    </style>
   </head>
   <body>
-    <div id="controls" class="container">
-      <button id="reset">Reset</button>
-      <button id="t1">Traverse Once</button>
-      <button id="t100">Traverse 100x</button>
-    </div>
-    <div id="app" class="container"></div>
-    <script type="module" src="/src/main.ts"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
